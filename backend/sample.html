@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSME AI Chatbot</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Segoe UI', Arial, sans-serif; }
+  body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    padding: 20px;
+  }
+  .main-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+  }
+  .chat-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 15px;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .language-bar {
+    padding: 12px;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .language-bar select, .language-bar button {
+    padding: 8px 15px;
+    border: 2px solid #667eea;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+  }
+  .language-bar button {
+    background: #007bff;
+    color: white;
+    border: none;
+  }
+  #chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background: #fafafa;
+  }
+  .message {
+    margin: 10px 0;
+    display: flex;
+    animation: fadeIn 0.3s ease-in;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .message.user { justify-content: flex-end; }
+  .message.bot { justify-content: flex-start; }
+  .message-content {
+    max-width: 75%;
+    padding: 10px 15px;
+    border-radius: 8px;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 14px;
+  }
+  .message.user .message-content {
+    background: #007bff;
+    color: white;
+  }
+  .message.bot .message-content {
+    background: white;
+    border: 1px solid #ddd;
+    color: #333;
+  }
+  .message.error .message-content {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+  .input-area {
+    display: flex;
+    padding: 10px;
+    gap: 8px;
+    background: white;
+    border-top: 1px solid #ddd;
+    flex-wrap: nowrap;
+  }
+  #user-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-height: 40px;
+    min-width: 200px;
+  }
+  button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s;
+    background: #007bff;
+    color: white;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button:hover:not(:disabled) { background: #0056b3; }
+  #voice-btn { background: #28a745; width: 40px; padding: 0; }
+  #voice-btn:hover:not(:disabled) { background: #218838; }
+  #voice-btn.recording { background: #dc3545; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+  .sidebar {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    padding: 15px;
+    height: fit-content;
+  }
+  .sidebar h3 {
+    background: #667eea;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  .sidebar-section {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  .sidebar-section:last-child { border-bottom: none; }
+  .sidebar button {
+    width: 100%;
+    background: #667eea;
+    font-size: 12px;
+    margin: 5px 0;
+  }
+  .stat-box {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 5px 0;
+    font-size: 12px;
+  }
+  .stat-box strong { color: #667eea; }
+
+  @media (max-width: 1024px) {
+    .main-container { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="main-container">
+  <div class="chat-container">
+    <div class="header">🏢 MSME AI Assistant</div>
+    
+    <div class="language-bar">
+      <label>🌐 Language:</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="te">Telugu (తెలుగు)</option>
+      </select>
+      <button type="button" id="track-btn">📋 Track App</button>
+    </div>
+
+    <div id="chat-box">
+      <div class="message bot">
+        <div class="message-content">👋 Welcome! I'm your MSME Assistant. I can help with:
+✅ Schemes & Policies
+✅ Application Tracking
+✅ Personalized Guidance
+✅ Real-time Updates</div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <button type="button" id="voice-btn" title="Record voice">🎤</button>
+      <input type="text" id="user-input" placeholder="Type your question..." />
+      <button type="button" id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <h3>🎯 Features</h3>
+    
+    <div class="sidebar-section">
+      <button type="button" id="feedback-btn">⭐ Feedback</button>
+      <button type="button" id="subscribe-btn">📧 Subscribe</button>
+      <button type="button" id="analytics-btn">📊 Analytics</button>
+    </div>
+
+    <div class="sidebar-section">
+      <h4 style="margin-bottom: 8px;">📈 Stats</h4>
+      <div class="stat-box">
+        <strong>Queries:</strong> <span id="stat-queries">0</span>
+      </div>
+      <div class="stat-box">
+        <strong>Feedback:</strong> <span id="stat-rating">-</span>/5
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "http://127.0.0.1:8000";
+const chatBox = document.getElementById('chat-box');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+const voiceBtn = document.getElementById('voice-btn');
+const langSelect = document.getElementById('language');
+
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingStream = null;
+
+function addMessage(text, type = 'user') {
+  const div = document.createElement('div');
+  div.className = `message ${type}`;
+  const content = document.createElement('div');
+  content.className = 'message-content';
+  content.textContent = text;
+  div.appendChild(content);
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function sendMessage(text = null) {
+  const message = text || userInput.value.trim();
+  if (!message) return;
+  
+  userInput.value = '';
+  addMessage(message, 'user');
+  
+  sendBtn.disabled = true;
+  userInput.disabled = true;
+  voiceBtn.disabled = true;
+
+  try {
+    const response = await fetch(`${API_BASE}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, language: langSelect.value })
+    });
+
+    const data = await response.json();
+    addMessage(data.reply || '❌ No response', data.status === 'success' ? 'bot' : 'error');
+    updateStats();
+  } catch (error) {
+    addMessage(`❌ ${error.message}`, 'error');
+  } finally {
+    sendBtn.disabled = false;
+    userInput.disabled = false;
+    voiceBtn.disabled = false;
+    userInput.focus();
+  }
+}
+
+function cleanupRecording() {
+  if (recordingStream) {
+    recordingStream.getTracks().forEach(track => track.stop());
+    recordingStream = null;
+  }
+  mediaRecorder = null;
+  isRecording = false;
+  voiceBtn.textContent = '🎤';
+  voiceBtn.classList.remove('recording');
+}
+
+async function transcribeAudio() {
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  audioChunks = [];
+  
+  if (blob.size === 0) {
+    addMessage('❌ No audio recorded', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', blob, 'audio.webm');
+
+  try {
+    const response = await fetch(`${API_BASE}/transcribe?language=${langSelect.value}`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success' && data.transcription) {
+      await sendMessage(data.transcription);
+    } else {
+      addMessage('❌ No speech detected', 'error');
+    }
+  } catch (error) {
+    addMessage(`❌ ${error.message}`, 'error');
+  }
+}
+
+async function toggleVoice() {
+  if (isRecording) {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+    }
+    isRecording = false;
+  } else {
+    try {
+      cleanupRecording();
+      
+      recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(recordingStream);
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+      
+      mediaRecorder.onstop = async () => {
+        await transcribeAudio();
+        cleanupRecording();
+      };
+      
+      mediaRecorder.start();
+      isRecording = true;
+      voiceBtn.textContent = '⏹️';
+      voiceBtn.classList.add('recording');
+    } catch (error) {
+      addMessage('❌ Microphone access denied', 'error');
+    }
+  }
+}
+
+async function updateStats() {
+  try {
+    const response = await fetch(`${API_BASE}/analytics`);
+    const data = await response.json();
+    document.getElementById('stat-queries').textContent = data.total_queries || 0;
+  } catch (e) {}
+
+  try {
+    const response = await fetch(`${API_BASE}/feedback-summary`);
+    const data = await response.json();
+    document.getElementById('stat-rating').textContent = data.average_rating || '-';
+  } catch (e) {}
+}
+
+langSelect.addEventListener('change', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  // Just store the selected language without refreshing
+  console.log("Language changed to:", langSelect.value);
+});
+
+
+// CRITICAL: Event listeners with preventDefault
+sendBtn.addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  sendMessage();
+  return false;
+});
+
+voiceBtn.addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  toggleVoice();
+  return false;
+});
+
+userInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    sendMessage();
+    return false;
+  }
+});
+document.querySelectorAll('form').forEach(f => f.onsubmit = e => e.preventDefault());
+
+document.getElementById('track-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  const appId = prompt("Enter Application ID:");
+  if (appId) sendMessage(`Track application: ${appId}`);
+  return false;
+});
+
+
+
+document.getElementById('feedback-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  alert('Feedback feature - coming soon!');
+});
+
+document.getElementById('subscribe-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  alert('Subscribe feature - coming soon!');
+});
+
+document.getElementById('analytics-btn').addEventListener('click', async function(e) {
+  e.preventDefault();
+  try {
+    const response = await fetch(`${API_BASE}/analytics`);
+    const data = await response.json();
+    addMessage(`📊 Total Queries: ${data.total_queries}`, 'bot');
+  } catch (error) {
+    addMessage('❌ Analytics unavailable', 'error');
+  }
+});
+
+// Global error handlers
+window.addEventListener('error', (e) => {
+  console.error('Error:', e.error);
+  e.preventDefault();
+  return true;
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('Promise rejection:', e.reason);
+  e.preventDefault();
+  return true;
+});
+
+// Prevent any accidental page refreshes
+window.addEventListener("beforeunload", (e) => {
+  e.preventDefault();
+  e.returnValue = ""; // Disable reloads caused by pending async tasks
+});
+
+
+// Initialize
+console.log('✅ App loaded');
+updateStats();
+</script>
+
+</body>
+</html>
