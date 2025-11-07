@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile,Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -291,16 +291,19 @@ async def chat(msg: Message):
         print(f"❌ Error: {str(e)}")
         return {"reply": f"❌ Error: {str(e)}", "status": "error"}
 
+
 @app.post("/transcribe")
-async def transcribe_audio(file: UploadFile = File(...), language: str = "en"):
+async def transcribe_audio(file: UploadFile = File(...), language: str = Form("en")):
+    """Voice-to-Text endpoint - Transcribe audio files (language passed in form field)"""
     temp_file_path = None
     try:
-        print(f"\n🎤 Transcribing ({language})...")
-        
+        print(f"\n🎤 Transcribing (lang={language})...")
+
         temp_file_path = f"temp_{int(time.time())}_{file.filename}"
         with open(temp_file_path, "wb") as f:
             f.write(await file.read())
-        
+
+        # Use groq client's audio transcription
         with open(temp_file_path, "rb") as f:
             transcription = groq_client.audio.transcriptions.create(
                 file=(file.filename, f.read()),
@@ -309,26 +312,21 @@ async def transcribe_audio(file: UploadFile = File(...), language: str = "en"):
                 response_format="text",
                 temperature=0.0
             )
-        
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
-        
+
         text = transcription.strip() if isinstance(transcription, str) else ""
-        
         if not text:
             return {"transcription": "", "status": "error", "message": "No speech detected"}
-        
-        print(f"✅ Transcription: {text[:50]}...")
-        
-        return {"transcription": text, "status": "success", "language": language}
-    
+
+        print(f"✅ Transcribed: {text[:120]}...")
+        return {"transcription": text, "status": "success"}
+
     except Exception as e:
-        print(f"❌ Transcription error: {str(e)}")
+        print(f"❌ Transcription error: {e}")
         return {"transcription": "", "status": "error", "message": str(e)}
-    
     finally:
         if temp_file_path and os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+            try: os.remove(temp_file_path)
+            except: pass
 
 @app.post("/feedback")
 async def submit_feedback(feedback: FeedbackModel):

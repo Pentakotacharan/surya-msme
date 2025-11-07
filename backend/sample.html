@@ -1,337 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSME AI Chatbot</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; font-family: 'Segoe UI', Arial, sans-serif; }
-  body {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    padding: 20px;
-  }
-  .main-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 20px;
-  }
-  .chat-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
-    height: 80vh;
-  }
-  .header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    padding: 15px;
-    border-radius: 12px 12px 0 0;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-  }
-  .language-bar {
-    padding: 12px;
-    background: #f0f0f0;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .language-bar select, .language-bar button {
-    padding: 8px 15px;
-    border: 2px solid #667eea;
-    border-radius: 4px;
-    font-size: 14px;
-    background: white;
-    cursor: pointer;
-  }
-  .language-bar button {
-    background: #007bff;
-    color: white;
-    border: none;
-  }
-  #chat-box {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    background: #fafafa;
-  }
-  .message {
-    margin: 10px 0;
-    display: flex;
-    animation: fadeIn 0.3s ease-in;
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .message.user { justify-content: flex-end; }
-  .message.bot { justify-content: flex-start; }
-  .message-content {
-    max-width: 75%;
-    padding: 10px 15px;
-    border-radius: 8px;
-    word-wrap: break-word;
-    line-height: 1.4;
-    font-size: 14px;
-  }
-  .message.user .message-content {
-    background: #007bff;
-    color: white;
-  }
-  .message.bot .message-content {
-    background: white;
-    border: 1px solid #ddd;
-    color: #333;
-  }
-  .message.error .message-content {
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
-  }
-  .input-area {
-    display: flex;
-    padding: 10px;
-    gap: 8px;
-    background: white;
-    border-top: 1px solid #ddd;
-    flex-wrap: nowrap;
-  }
-  #user-input {
-    flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    min-height: 40px;
-    min-width: 200px;
-  }
-  button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    transition: all 0.2s;
-    background: #007bff;
-    color: white;
-  }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  button:hover:not(:disabled) { background: #0056b3; }
-  #voice-btn { background: #28a745; width: 40px; padding: 0; }
-  #voice-btn:hover:not(:disabled) { background: #218838; }
-  #voice-btn.recording { background: #dc3545; animation: pulse 1s infinite; }
-  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-
-  .sidebar {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    padding: 15px;
-    height: fit-content;
-  }
-  .sidebar h3 {
-    background: #667eea;
-    color: white;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    font-size: 16px;
-  }
-  .sidebar-section {
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-  }
-  .sidebar-section:last-child { border-bottom: none; }
-  .sidebar button {
-    width: 100%;
-    background: #667eea;
-    font-size: 12px;
-    margin: 5px 0;
-  }
-  .stat-box {
-    background: #f0f0f0;
-    padding: 10px;
-    border-radius: 4px;
-    margin: 5px 0;
-    font-size: 12px;
-  }
-  .stat-box strong { color: #667eea; }
-
-  @media (max-width: 1024px) {
-    .main-container { grid-template-columns: 1fr; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSME AI Assistant - AP Digital Empowerment Challenge 2025</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body { 
+      height: 100%; 
+      width: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    body {
+      margin: 0;
+      padding: 10px;
+      overflow: hidden;
+    }
+    
+    .app-container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 15px 15px 0 0;
+    }
+    
+    .header h1 { font-size: 24px; margin-bottom: 5px; }
+    .header p { font-size: 12px; opacity: 0.9; }
+    
+    .toolbar {
+      padding: 12px 20px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .toolbar select {
+      padding: 8px 12px;
+      border: 1px solid #667eea;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: #666;
+      margin-left: auto;
+    }
+    
+    .stat-item { display: flex; gap: 5px; }
+    
+    .feature-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+    
+    .feature-btn {
+      background: #667eea;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .feature-btn:hover {
+      background: #764ba2;
+      transform: scale(1.05);
+    }
+    
+    .feature-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .message {
+      display: flex;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message.user { justify-content: flex-end; }
+    .message.bot { justify-content: flex-start; }
+    
+    .message-bubble {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+    
+    .message.user .message-bubble {
+      background: #007bff;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message.bot .message-bubble {
+      background: white;
+      color: #333;
+      border: 1px solid #ddd;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .message.error .message-bubble {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .input-container {
+      padding: 15px 20px;
+      background: white;
+      border-top: 1px solid #ddd;
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      border-radius: 0 0 15px 15px;
+    }
+    
+    .input-container input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .input-container input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    
+    .btn-send {
+      background: #007bff;
+      color: white;
+      min-width: 70px;
+    }
+    
+    .btn-send:hover:not(:disabled) {
+      background: #0056b3;
+      transform: translateY(-2px);
+    }
+    
+    .btn-voice {
+      background: #28a745;
+      color: white;
+      min-width: 45px;
+    }
+    
+    .btn-voice:hover:not(:disabled) {
+      background: #218838;
+    }
+    
+    .btn-voice.recording {
+      background: #dc3545;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal.active { display: flex; }
+    
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+    }
+    
+    .modal-content h3 { margin-bottom: 20px; }
+    
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
 
-<div class="main-container">
-  <div class="chat-container">
-    <div class="header">🏢 MSME AI Assistant</div>
+<div class="app-container">
+  <div class="header">
+    <h1>🏢 MSME AI Assistant</h1>
+    <p>AP MSME Digital Empowerment Challenge 2025</p>
+  </div>
+  
+  <div class="toolbar">
+    <label>🌐 Language:</label>
+    <select id="language">
+      <option value="en">English</option>
+      <option value="te">Telugu (తెలుగు)</option>
+    </select>
     
-    <div class="language-bar">
-      <label>🌐 Language:</label>
-      <select id="language">
-        <option value="en">English</option>
-        <option value="te">Telugu (తెలుగు)</option>
-      </select>
-      <button type="button" id="track-btn">📋 Track App</button>
+    <div class="stats">
+      <div class="stat-item">📊 Queries: <span id="stat-queries">0</span></div>
+      <div class="stat-item">⭐ Rating: <span id="stat-rating">-</span>/5</div>
+      <div class="stat-item">💬 Feedback: <span id="stat-feedback">0</span></div>
     </div>
-
-    <div id="chat-box">
-      <div class="message bot">
-        <div class="message-content">👋 Welcome! I'm your MSME Assistant. I can help with:
-✅ Schemes & Policies
-✅ Application Tracking
-✅ Personalized Guidance
-✅ Real-time Updates</div>
-      </div>
-    </div>
-
-    <div class="input-area">
-      <button type="button" id="voice-btn" title="Record voice">🎤</button>
-      <input type="text" id="user-input" placeholder="Type your question..." />
-      <button type="button" id="send-btn">Send</button>
+    
+    <div class="feature-buttons">
+      <button class="feature-btn" type="button" id="btn-feedback">⭐ Feedback</button>
+      <button class="feature-btn" type="button" id="btn-subscribe">📧 Subscribe</button>
+      <button class="feature-btn" type="button" id="btn-track">📋 Track</button>
     </div>
   </div>
+  
+  <div class="chat-container" id="chatContainer">
+    <div class="message bot">
+      <div class="message-bubble">👋 Welcome to MSME AI Assistant!
 
-  <div class="sidebar">
-    <h3>🎯 Features</h3>
-    
-    <div class="sidebar-section">
-      <button type="button" id="feedback-btn">⭐ Feedback</button>
-      <button type="button" id="subscribe-btn">📧 Subscribe</button>
-      <button type="button" id="analytics-btn">📊 Analytics</button>
+I can help with:
+✅ Government schemes & policies
+✅ MSME registration
+✅ Loan guidance
+✅ Application tracking
+✅ Business recommendations
+
+Ask me anything!</div>
     </div>
+  </div>
+  
+  <div class="input-container">
+    <button type="button" class="btn btn-voice" id="voiceBtn">🎤</button>
+    <input type="text" id="userInput" placeholder="Type your question..." autocomplete="off" />
+    <button type="button" class="btn btn-send" id="sendBtn">Send</button>
+  </div>
+</div>
 
-    <div class="sidebar-section">
-      <h4 style="margin-bottom: 8px;">📈 Stats</h4>
-      <div class="stat-box">
-        <strong>Queries:</strong> <span id="stat-queries">0</span>
-      </div>
-      <div class="stat-box">
-        <strong>Feedback:</strong> <span id="stat-rating">-</span>/5
-      </div>
+<!-- Feedback Modal -->
+<div id="feedbackModal" class="modal">
+  <div class="modal-content">
+    <h3>📝 Share Feedback</h3>
+    <label>Rating:</label>
+    <select id="feedbackRating">
+      <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+      <option value="4">⭐⭐⭐⭐ Good</option>
+      <option value="3">⭐⭐⭐ Average</option>
+      <option value="2">⭐⭐ Poor</option>
+      <option value="1">⭐ Very Poor</option>
+    </select>
+    <textarea id="feedbackComment" placeholder="Your comments..." rows="4"></textarea>
+    <div class="modal-buttons">
+      <button type="button" onclick="submitFeedback()">Submit</button>
+      <button type="button" onclick="closeFeedbackModal()" style="background: #ccc;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Subscribe Modal -->
+<div id="subscribeModal" class="modal">
+  <div class="modal-content">
+    <h3>📧 Subscribe Updates</h3>
+    <input type="email" id="subscribeEmail" placeholder="Email" />
+    <input type="tel" id="subscribePhone" placeholder="Phone (optional)" />
+    <div class="modal-buttons">
+      <button type="button" onclick="submitSubscription()">Subscribe</button>
+      <button type="button" onclick="closeSubscribeModal()" style="background: #ccc;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Track Modal -->
+<div id="trackModal" class="modal">
+  <div class="modal-content">
+    <h3>📋 Track Application</h3>
+    <input type="text" id="trackingAppId" placeholder="Application ID" />
+    <div class="modal-buttons">
+      <button type="button" onclick="trackApplication()">Track</button>
+      <button type="button" onclick="closeTrackingModal()" style="background: #ccc;">Cancel</button>
     </div>
   </div>
 </div>
 
 <script>
-const API_BASE = "http://127.0.0.1:8000";
-const chatBox = document.getElementById('chat-box');
-const userInput = document.getElementById('user-input');
-const sendBtn = document.getElementById('send-btn');
-const voiceBtn = document.getElementById('voice-btn');
-const langSelect = document.getElementById('language');
+const API_URL = "http://127.0.0.1:8000";
+const chatContainer = document.getElementById("chatContainer");
+const userInput = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const voiceBtn = document.getElementById("voiceBtn");
+const languageSelect = document.getElementById("language");
 
 let isRecording = false;
 let mediaRecorder = null;
 let audioChunks = [];
 let recordingStream = null;
 
-function addMessage(text, type = 'user') {
-  const div = document.createElement('div');
-  div.className = `message ${type}`;
-  const content = document.createElement('div');
-  content.className = 'message-content';
-  content.textContent = text;
-  div.appendChild(content);
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
+function addMessage(text, sender = "user") {
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `message ${sender}`;
+  
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+  bubble.textContent = text;
+  
+  msgDiv.appendChild(bubble);
+  chatContainer.appendChild(msgDiv);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
 async function sendMessage(text = null) {
   const message = text || userInput.value.trim();
   if (!message) return;
   
-  userInput.value = '';
-  addMessage(message, 'user');
+  userInput.value = "";
+  addMessage(message, "user");
   
   sendBtn.disabled = true;
-  userInput.disabled = true;
   voiceBtn.disabled = true;
-
+  userInput.disabled = true;
+  
   try {
-    const response = await fetch(`${API_BASE}/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, language: langSelect.value })
+    const response = await fetch(`${API_URL}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, language: languageSelect.value })
     });
-
+    
     const data = await response.json();
-    addMessage(data.reply || '❌ No response', data.status === 'success' ? 'bot' : 'error');
+    
+    if (data.status === "success") {
+      addMessage(data.reply, "bot");
+    } else {
+      addMessage(`❌ ${data.reply}`, "error");
+    }
+    
     updateStats();
   } catch (error) {
-    addMessage(`❌ ${error.message}`, 'error');
+    addMessage(`❌ ${error.message}`, "error");
   } finally {
     sendBtn.disabled = false;
-    userInput.disabled = false;
     voiceBtn.disabled = false;
+    userInput.disabled = false;
     userInput.focus();
-  }
-}
-
-function cleanupRecording() {
-  if (recordingStream) {
-    recordingStream.getTracks().forEach(track => track.stop());
-    recordingStream = null;
-  }
-  mediaRecorder = null;
-  isRecording = false;
-  voiceBtn.textContent = '🎤';
-  voiceBtn.classList.remove('recording');
-}
-
-async function transcribeAudio() {
-  const blob = new Blob(audioChunks, { type: 'audio/webm' });
-  audioChunks = [];
-  
-  if (blob.size === 0) {
-    addMessage('❌ No audio recorded', 'error');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', blob, 'audio.webm');
-
-  try {
-    const response = await fetch(`${API_BASE}/transcribe?language=${langSelect.value}`, {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-
-    if (data.status === 'success' && data.transcription) {
-      await sendMessage(data.transcription);
-    } else {
-      addMessage('❌ No speech detected', 'error');
-    }
-  } catch (error) {
-    addMessage(`❌ ${error.message}`, 'error');
   }
 }
 
 async function toggleVoice() {
   if (isRecording) {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
       mediaRecorder.stop();
     }
     isRecording = false;
+    voiceBtn.textContent = "🎤";
+    voiceBtn.classList.remove("recording");
   } else {
     try {
-      cleanupRecording();
+      if (recordingStream) {
+        recordingStream.getTracks().forEach(t => t.stop());
+      }
       
       recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunks = [];
+      
       mediaRecorder = new MediaRecorder(recordingStream);
       
       mediaRecorder.ondataavailable = (e) => {
@@ -339,119 +458,192 @@ async function toggleVoice() {
       };
       
       mediaRecorder.onstop = async () => {
-        await transcribeAudio();
-        cleanupRecording();
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+        audioChunks = [];
+        
+        if (blob.size > 0) {
+          await transcribeAudio(blob);
+        }
+        
+        if (recordingStream) {
+          recordingStream.getTracks().forEach(t => t.stop());
+          recordingStream = null;
+        }
       };
       
       mediaRecorder.start();
       isRecording = true;
-      voiceBtn.textContent = '⏹️';
-      voiceBtn.classList.add('recording');
+      voiceBtn.textContent = "⏹️";
+      voiceBtn.classList.add("recording");
     } catch (error) {
-      addMessage('❌ Microphone access denied', 'error');
+      addMessage("❌ Microphone access denied", "error");
     }
+  }
+}
+
+async function transcribeAudio(blob) {
+  const formData = new FormData();
+  formData.append("file", blob, "audio.webm");
+  
+  try {
+    const response = await fetch(`${API_URL}/transcribe?language=${languageSelect.value}`, {
+      method: "POST",
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (data.status === "success" && data.transcription) {
+      await sendMessage(data.transcription);
+    } else {
+      addMessage("❌ No speech detected", "error");
+    }
+  } catch (error) {
+    addMessage(`❌ ${error.message}`, "error");
   }
 }
 
 async function updateStats() {
   try {
-    const response = await fetch(`${API_BASE}/analytics`);
+    const response = await fetch(`${API_URL}/analytics`);
     const data = await response.json();
-    document.getElementById('stat-queries').textContent = data.total_queries || 0;
-  } catch (e) {}
-
-  try {
-    const response = await fetch(`${API_BASE}/feedback-summary`);
-    const data = await response.json();
-    document.getElementById('stat-rating').textContent = data.average_rating || '-';
+    
+    document.getElementById("stat-queries").textContent = data.total_queries || 0;
+    document.getElementById("stat-rating").textContent = data.average_rating || "-";
+    document.getElementById("stat-feedback").textContent = data.total_feedback || 0;
   } catch (e) {}
 }
 
-langSelect.addEventListener('change', function(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  // Just store the selected language without refreshing
-  console.log("Language changed to:", langSelect.value);
-});
+function openFeedbackModal() {
+  document.getElementById("feedbackModal").classList.add("active");
+}
 
+function closeFeedbackModal() {
+  document.getElementById("feedbackModal").classList.remove("active");
+}
 
-// CRITICAL: Event listeners with preventDefault
-sendBtn.addEventListener('click', function(e) {
+async function submitFeedback() {
+  const rating = document.getElementById("feedbackRating").value;
+  const comment = document.getElementById("feedbackComment").value;
+  
+  if (!comment.trim()) { alert("Enter comment"); return; }
+  
+  try {
+    const response = await fetch(`${API_URL}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rating: parseInt(rating), comment })
+    });
+    
+    addMessage("✅ Feedback submitted!", "bot");
+    closeFeedbackModal();
+    document.getElementById("feedbackComment").value = "";
+    updateStats();
+  } catch (error) {
+    addMessage(`❌ ${error.message}`, "error");
+  }
+}
+
+function openSubscribeModal() {
+  document.getElementById("subscribeModal").classList.add("active");
+}
+
+function closeSubscribeModal() {
+  document.getElementById("subscribeModal").classList.remove("active");
+}
+
+async function submitSubscription() {
+  const email = document.getElementById("subscribeEmail").value;
+  const phone = document.getElementById("subscribePhone").value;
+  
+  if (!email) { alert("Enter email"); return; }
+  
+  try {
+    await fetch(`${API_URL}/subscribe-updates`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, phone })
+    });
+    
+    addMessage("✅ Subscribed successfully!", "bot");
+    closeSubscribeModal();
+    document.getElementById("subscribeEmail").value = "";
+    document.getElementById("subscribePhone").value = "";
+  } catch (error) {
+    addMessage(`❌ ${error.message}`, "error");
+  }
+}
+
+function openTrackingModal() {
+  document.getElementById("trackModal").classList.add("active");
+}
+
+function closeTrackingModal() {
+  document.getElementById("trackModal").classList.remove("active");
+}
+
+async function trackApplication() {
+  const appId = document.getElementById("trackingAppId").value;
+  
+  if (!appId) { alert("Enter application ID"); return; }
+  
+  closeTrackingModal();
+  addMessage(`Tracking: ${appId}`, "user");
+  
+  try {
+    const response = await fetch(`${API_URL}/track-application/${appId}`);
+    const data = await response.json();
+    
+    if (data.status === "success") {
+      addMessage(`✅ Status: ${data.current_status}`, "bot");
+    } else {
+      addMessage(`ℹ️ Application not found`, "bot");
+    }
+  } catch (error) {
+    addMessage(`❌ ${error.message}`, "error");
+  }
+}
+
+// Event listeners
+sendBtn.addEventListener("click", function(e) {
   e.preventDefault();
   e.stopPropagation();
   sendMessage();
   return false;
 });
 
-voiceBtn.addEventListener('click', function(e) {
+voiceBtn.addEventListener("click", function(e) {
   e.preventDefault();
   e.stopPropagation();
   toggleVoice();
   return false;
 });
 
-userInput.addEventListener('keypress', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
+userInput.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     e.stopPropagation();
     sendMessage();
     return false;
   }
 });
-document.querySelectorAll('form').forEach(f => f.onsubmit = e => e.preventDefault());
 
-document.getElementById('track-btn').addEventListener('click', function(e) {
-  e.preventDefault();
-  const appId = prompt("Enter Application ID:");
-  if (appId) sendMessage(`Track application: ${appId}`);
-  return false;
+document.getElementById("btn-feedback").addEventListener("click", openFeedbackModal);
+document.getElementById("btn-subscribe").addEventListener("click", openSubscribeModal);
+document.getElementById("btn-track").addEventListener("click", openTrackingModal);
+
+document.getElementById("feedbackModal").addEventListener("click", function(e) {
+  if (e.target === this) closeFeedbackModal();
 });
 
-
-
-document.getElementById('feedback-btn').addEventListener('click', function(e) {
-  e.preventDefault();
-  alert('Feedback feature - coming soon!');
+document.getElementById("subscribeModal").addEventListener("click", function(e) {
+  if (e.target === this) closeSubscribeModal();
 });
 
-document.getElementById('subscribe-btn').addEventListener('click', function(e) {
-  e.preventDefault();
-  alert('Subscribe feature - coming soon!');
+document.getElementById("trackModal").addEventListener("click", function(e) {
+  if (e.target === this) closeTrackingModal();
 });
 
-document.getElementById('analytics-btn').addEventListener('click', async function(e) {
-  e.preventDefault();
-  try {
-    const response = await fetch(`${API_BASE}/analytics`);
-    const data = await response.json();
-    addMessage(`📊 Total Queries: ${data.total_queries}`, 'bot');
-  } catch (error) {
-    addMessage('❌ Analytics unavailable', 'error');
-  }
-});
-
-// Global error handlers
-window.addEventListener('error', (e) => {
-  console.error('Error:', e.error);
-  e.preventDefault();
-  return true;
-});
-
-window.addEventListener('unhandledrejection', (e) => {
-  console.error('Promise rejection:', e.reason);
-  e.preventDefault();
-  return true;
-});
-
-// Prevent any accidental page refreshes
-window.addEventListener("beforeunload", (e) => {
-  e.preventDefault();
-  e.returnValue = ""; // Disable reloads caused by pending async tasks
-});
-
-
-// Initialize
-console.log('✅ App loaded');
 updateStats();
 </script>
 

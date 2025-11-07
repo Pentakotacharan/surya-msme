@@ -1,480 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSME Voice Chatbot</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100%;
-    font-family: 'Segoe UI', Arial, sans-serif;
-  }
-  body {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-  }
-  .chat-container {
-    width: 100%;
-    max-width: 550px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
-    height: 85vh;
-    max-height: 700px;
-  }
-  .header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-  }
-  .language-bar {
-    padding: 12px;
-    background: #f0f0f0;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-  }
-  .language-bar label {
-    font-weight: bold;
-    margin-right: 10px;
-    font-size: 14px;
-  }
-  .language-bar select {
-    padding: 8px 15px;
-    border: 2px solid #667eea;
-    border-radius: 4px;
-    font-size: 14px;
-    background: white;
-    cursor: pointer;
-  }
-  #chat-box {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    background: #fafafa;
-  }
-  .message {
-    margin: 10px 0;
-    display: flex;
-    animation: fadeIn 0.3s ease-in;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  .message.user { justify-content: flex-end; }
-  .message.bot { justify-content: flex-start; }
-  .message-content {
-    max-width: 75%;
-    padding: 10px 15px;
-    border-radius: 8px;
-    word-wrap: break-word;
-    line-height: 1.4;
-    font-size: 14px;
-  }
-  .message.user .message-content {
-    background: #007bff;
-    color: white;
-  }
-  .message.bot .message-content {
-    background: white;
-    border: 1px solid #ddd;
-    color: #333;
-  }
-  .message.error .message-content {
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
-  }
-  .message.system .message-content {
-    background: #fff3cd;
-    border: 1px solid #ffeeba;
-    color: #856404;
-    text-align: center;
-    font-size: 12px;
-  }
-  .input-area {
-    display: flex;
-    padding: 10px;
-    gap: 8px;
-    background: white;
-    border-top: 1px solid #ddd;
-    flex-wrap: nowrap;
-  }
-  #user-input {
-    flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    resize: none;
-    min-height: 40px;
-  }
-  #user-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-  }
-  button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  }
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-  #send-btn {
-    background: #007bff;
-    color: white;
-    min-width: 60px;
-  }
-  #send-btn:hover:not(:disabled) {
-    background: #0056b3;
-  }
-  #voice-btn {
-    background: #28a745;
-    color: white;
-    width: 40px;
-    padding: 0;
-    min-width: 40px;
-  }
-  #voice-btn:hover:not(:disabled) {
-    background: #218838;
-  }
-  #voice-btn.recording {
-    background: #dc3545;
-    animation: pulse 1s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-  }
-  .debug-info {
-    font-size: 11px;
-    color: #666;
-    padding: 5px 10px;
-    background: #f9f9f9;
-    border-top: 1px solid #eee;
-    text-align: center;
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>MSME AI Assistant — AP MSME Digital Empowerment</title>
+  <style>
+    /* Clean, mobile-first UI. Keep it minimal + aesthetic. */
+    :root{
+      --primary:#667eea; --primary-2:#764ba2; --accent:#28a745; --danger:#dc3545;
+      --glass: rgba(255,255,255,0.85);
+      --muted:#67728a;
+      --card-radius:14px;
+      font-family: "Segoe UI", Roboto, system-ui, Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-font-smoothing:antialiased}
+    .app {
+      max-width:980px;
+      margin:18px auto;
+      background:var(--glass);
+      border-radius:var(--card-radius);
+      box-shadow:0 18px 60px rgba(0,0,0,0.25);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      height:calc(100vh - 36px);
+      min-height:580px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+
+    .header{
+      padding:18px 20px;
+      background:linear-gradient(90deg,var(--primary),var(--primary-2));
+      color:#fff;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .brand {display:flex; gap:12px; align-items:center}
+    .brand h1{font-size:18px;margin:0}
+    .brand p{margin:0;font-size:12px;opacity:0.95}
+
+    .toolbar{
+      padding:12px 16px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      background:transparent;
+      flex-wrap:wrap;
+    }
+
+    select, .btn, input[type="email"]{font-family:inherit}
+    select{
+      padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.08)
+    }
+    .stats{display:flex;gap:12px;margin-left:auto;color:var(--muted);font-size:13px;align-items:center}
+    .feature-buttons{display:flex; gap:8px}
+
+    /* Chat area */
+    .chat-area{flex:1;display:flex;flex-direction:column; background:linear-gradient(180deg, rgba(255,255,255,0.97), #f7f9fc); padding:14px; overflow:hidden}
+    .messages{flex:1; overflow:auto; display:flex; flex-direction:column; gap:10px; padding:8px}
+    .msg{max-width:78%; padding:12px 14px; border-radius:12px; line-height:1.4; box-shadow:0 4px 12px rgba(12,15,23,0.04)}
+    .msg.bot{align-self:flex-start; background:white; color:#222; border:1px solid rgba(0,0,0,0.04)}
+    .msg.user{align-self:flex-end; background:linear-gradient(90deg,#007bff,#0056d6); color:#fff}
+    .msg.system{align-self:center; background:#fff9e6; color:#5a3f00; border:1px solid #ffecb3}
+
+    .input-row{display:flex; gap:8px; padding:12px; background:white; border-top:1px solid rgba(0,0,0,0.05); align-items:center}
+    .input-row input[type="text"]{flex:1;padding:12px;border-radius:10px;border:1px solid #ddd}
+    .btn{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn-send{background:linear-gradient(90deg,#007bff,#0056d6); color:white}
+    .btn-voice{background:var(--accent); color:#fff; min-width:56px}
+    .btn-voice.recording{background:var(--danger); animation:pulse 1s infinite}
+    @keyframes pulse{ 0%{opacity:1} 50%{opacity:0.7} 100%{opacity:1} }
+
+    /* modals */
+    .modal { display:none; position:fixed; inset:0; background:rgba(8,12,22,0.35); z-index:1000; align-items:center; justify-content:center; }
+    .modal.active{display:flex}
+    .modal-card{width:95%;max-width:480px;background:white;padding:18px;border-radius:12px}
+
+    /* responsive tweaks */
+    @media (max-width:640px){
+      .brand h1{font-size:16px}
+      .toolbar { padding:8px; gap:8px }
+      .messages{padding-bottom:12px}
+    }
+
+    /* small helpers */
+    .tiny{font-size:12px;color:var(--muted)}
+    .muted{color:var(--muted)}
+  </style>
 </head>
 <body>
+  <div class="app" role="application" aria-label="MSME AI Assistant">
+    <div class="header">
+      <div class="brand">
+        <div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700">AP</div>
+        <div>
+          <h1>MSME AI Assistant</h1>
+          <p class="tiny">AP MSME Digital Empowerment Challenge 2025 — Voice + Multilingual + Track</p>
+        </div>
+      </div>
 
-<div class="chat-container">
-  <div class="header">🏢 MSME Assistant</div>
-  
-  <div class="language-bar">
-    <label for="language">🌐 Language:</label>
-    <select id="language">
-      <option value="en">English</option>
-      <option value="te">Telugu (తెలుగు)</option>
-    </select>
-  </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="stats" aria-hidden>
+          <div>📊 <span id="stat-queries">0</span></div>
+          <div>⭐ <span id="stat-rating">-</span></div>
+        </div>
+      </div>
+    </div>
 
-  <div id="chat-box">
-    <div class="message bot">
-      <div class="message-content">👋 Hello! How can I help you today?</div>
+    <div class="toolbar" role="toolbar" aria-label="Controls">
+      <label class="tiny">Language</label>
+      <select id="language" aria-label="Select language">
+        <option value="en">English</option>
+        <option value="te">Telugu (తెలుగు)</option>
+      </select>
+
+      <div class="feature-buttons" style="margin-left:auto">
+        <button id="btn-feedback" class="btn" type="button">⭐ Feedback</button>
+        <button id="btn-subscribe" class="btn" type="button">📧 Subscribe</button>
+        <button id="btn-track" class="btn" type="button">📋 Track</button>
+        <button id="btn-analytics" class="btn" type="button">📈 Analytics</button>
+      </div>
+    </div>
+
+    <div class="chat-area">
+      <div class="messages" id="messages" role="log" aria-live="polite">
+        <div class="msg bot" aria-hidden><strong>👋 Welcome!</strong><div class="tiny muted" style="margin-top:6px">Ask about schemes, application process, tracking and more. Tap 🎤 to speak.</div></div>
+      </div>
+
+      <form id="chatForm" class="input-row" onsubmit="return false;">
+        <button id="voiceBtn" type="button" class="btn btn-voice" aria-label="Record voice">🎤</button>
+        <input id="userInput" type="text" inputmode="text" placeholder="Type your question..." autocomplete="off" />
+        <button id="sendBtn" class="btn btn-send" type="button">Send</button>
+      </form>
     </div>
   </div>
 
-  <div class="input-area">
-    <button id="voice-btn" title="Record voice">🎤</button>
-    <input type="text" id="user-input" placeholder="Type your message..." />
-    <button id="send-btn">Send</button>
+  <!-- Feedback Modal -->
+  <div id="feedbackModal" class="modal" aria-hidden>
+    <div class="modal-card">
+      <h3>Share feedback</h3>
+      <label class="tiny">Rating</label>
+      <select id="feedbackRating">
+        <option value="5">5 — Excellent</option>
+        <option value="4">4 — Good</option>
+        <option value="3">3 — Average</option>
+        <option value="2">2 — Poor</option>
+        <option value="1">1 — Very poor</option>
+      </select>
+      <textarea id="feedbackComment" rows="4" style="width:100%;margin-top:10px" placeholder="Your comment"></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button type="button" onclick="submitFeedback()" class="btn btn-send">Submit</button>
+        <button type="button" onclick="closeFeedbackModal()" class="btn" style="background:#eee">Cancel</button>
+      </div>
+    </div>
   </div>
 
-  <div class="debug-info" id="debug">Ready</div>
-</div>
+  <!-- Subscribe Modal -->
+  <div id="subscribeModal" class="modal" aria-hidden>
+    <div class="modal-card">
+      <h3>Subscribe for updates</h3>
+      <input id="subscribeEmail" type="email" placeholder="Email" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:8px" />
+      <input id="subscribePhone" type="tel" placeholder="Phone (optional)" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:8px" />
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button type="button" onclick="submitSubscription()" class="btn btn-send">Subscribe</button>
+        <button type="button" onclick="closeSubscribeModal()" class="btn" style="background:#eee">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Track Modal -->
+  <div id="trackModal" class="modal" aria-hidden>
+    <div class="modal-card">
+      <h3>Track Application</h3>
+      <input id="trackingAppId" placeholder="Application ID" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:8px" />
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button type="button" onclick="trackApplication()" class="btn btn-send">Track</button>
+        <button type="button" onclick="closeTrackingModal()" class="btn" style="background:#eee">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Modal -->
+  <div id="analyticsModal" class="modal" aria-hidden>
+    <div class="modal-card">
+      <h3>Analytics</h3>
+      <div id="analyticsBody" class="tiny" style="margin-top:8px">Loading...</div>
+      <div style="text-align:right;margin-top:12px"><button type="button" onclick="closeAnalyticsModal()" class="btn" style="background:#eee">Close</button></div>
+    </div>
+  </div>
 
 <script>
-// ===== Configuration =====
-const API_BASE = "http://127.0.0.1:8000";
+/* ========== Configuration ========== */
+const API_URL = (location.hostname === "127.0.0.1" || location.hostname === "localhost") ? "http://127.0.0.1:8000" : `${location.protocol}//${location.host}`;
+const messagesEl = document.getElementById('messages');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const voiceBtn = document.getElementById('voiceBtn');
+const languageSelect = document.getElementById('language');
+const statQueries = document.getElementById('stat-queries');
+const statRating = document.getElementById('stat-rating');
 
-// ===== DOM Elements =====
-const chatBox = document.getElementById('chat-box');
-const userInput = document.getElementById('user-input');
-const sendBtn = document.getElementById('send-btn');
-const voiceBtn = document.getElementById('voice-btn');
-const langSelect = document.getElementById('language');
-const debugInfo = document.getElementById('debug');
+// -------------------- Dedup & normalizer (paste near top of your script) --------------------
+// Prevent concurrent transcriptions and dedupe repeated transcripts
+let _msme_isTranscribing = false;
+const _msme_seenRequestIds = new Set();
+const _msme_seenTranscripts = new Map();
+const TRANSCRIPT_DEDUPE_MS = 5000; // ignore same text within 5s
 
-// ===== State Variables =====
-let isRecording = false;
-let mediaRecorder = null;
-let audioChunks = [];
-let isSending = false;
-let recordingStream = null;
-
-// ===== Utility Functions =====
-function log(msg) {
-  console.log(`[${new Date().toLocaleTimeString()}] ${msg}`);
-  debugInfo.textContent = msg;
+// Normalizer used to compare transcripts reliably
+function normalizeTranscript(txt){
+  return String(txt || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/[^\w\s\u0C00-\u0C7F]/g, '') // keep Telugu Unicode block (U+0C00–0C7F) and word chars
+    .trim();
 }
 
-function addMessage(text, type = 'user') {
-  const div = document.createElement('div');
-  div.className = `message ${type}`;
-  
-  const content = document.createElement('div');
-  content.className = 'message-content';
-  content.textContent = text;
-  
-  div.appendChild(content);
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
+
+/* ========== UI helpers ========== */
+function addMessage(text, who = 'bot') {
+  const el = document.createElement('div');
+  el.className = 'msg ' + (who === 'user' ? 'user' : who === 'bot' ? 'bot' : 'system');
+  el.textContent = text;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-// ===== Send Message Function =====
-async function sendMessage(text = null) {
-  if (isSending) {
-    log('⚠️ Already sending...');
-    return;
+/* ========== Analytics poll ========== */
+async function updateStats(){
+  try{
+    const r = await fetch(API_URL + '/analytics');
+    if(!r.ok) return;
+    const data = await r.json();
+    statQueries.textContent = data.total_queries||0;
+    statRating.textContent = data.average_rating || '-';
+    const analyticsBody = document.getElementById('analyticsBody');
+    if(analyticsBody) analyticsBody.innerHTML = `
+      Total queries: ${data.total_queries || 0} <br />
+      By language: ${JSON.stringify(data.by_language || {})} <br />
+      Avg rating: ${data.average_rating || '-'} <br />
+      Total feedback: ${data.total_feedback || 0}
+    `;
+  }catch(e){
+    // ignore
   }
+}
+updateStats();
 
+/* ========== Chat send ========== */
+// Replace your existing sendMessage with this.
+// displayUser=true (default) will show the user's message in chat.
+// If caller already displayed the message (e.g. transcription handler), pass displayUser=false.
+async function sendMessage(text = null, displayUser = true){
   const message = text || userInput.value.trim();
-  
-  if (!message) {
-    return;
-  }
+  if(!message) return;
 
-  const language = langSelect.value;
-  log(`📤 Sending in ${language}...`);
-  
-  userInput.value = '';
-  addMessage(message, 'user');
-  
-  isSending = true;
-  sendBtn.disabled = true;
-  userInput.disabled = true;
-  voiceBtn.disabled = true;
-
-  try {
-    const response = await fetch(`${API_BASE}/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, language })
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.status === 'success') {
-      addMessage(data.reply, 'bot');
-      log('✅ Reply received');
-    } else {
-      addMessage(`❌ ${data.reply}`, 'error');
-      log('❌ Error in response');
-    }
-
-  } catch (error) {
-    log(`❌ Error: ${error.message}`);
-    addMessage(`❌ ${error.message}`, 'error');
-  } finally {
-    isSending = false;
-    sendBtn.disabled = false;
-    userInput.disabled = false;
-    voiceBtn.disabled = false;
-    userInput.focus();
-  }
-}
-
-// ===== Clean up recording resources =====
-function cleanupRecording() {
-  if (recordingStream) {
-    recordingStream.getTracks().forEach(track => {
-      try {
-        track.stop();
-      } catch (e) {
-        console.error('Track stop error:', e);
-      }
-    });
-    recordingStream = null;
-  }
-  mediaRecorder = null;
-  isRecording = false;
-  voiceBtn.textContent = '🎤';
-  voiceBtn.classList.remove('recording');
-  voiceBtn.disabled = false;
-}
-
-// ===== Transcribe Audio =====
-async function transcribeAudio() {
-  const language = langSelect.value;
-  log(`🎤 Transcribing...`);
-  
-  const blob = new Blob(audioChunks, { type: 'audio/webm' });
-  audioChunks = []; // Clear immediately
-  
-  if (blob.size === 0) {
-    log('❌ No audio');
-    addMessage('❌ No audio recorded', 'error');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', blob, 'audio.webm');
-
-  try {
-    const response = await fetch(`${API_BASE}/transcribe?language=${language}`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.status === 'success' && data.transcription && data.transcription.trim()) {
-      const text = data.transcription.trim();
-      log(`✅ Got: ${text.substring(0, 30)}...`);
-      await sendMessage(text);
-    } else {
-      log('❌ No speech');
-      addMessage('❌ No speech detected', 'error');
-    }
-
-  } catch (error) {
-    log(`❌ ${error.message}`);
-    addMessage(`❌ Transcription failed`, 'error');
-  }
-}
-
-// ===== Voice Recording Toggle =====
-async function toggleVoice() {
-  if (isRecording) {
-    // Stop recording
-    log('⏹️ Stopping...');
-    
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-    }
-    
-    isRecording = false;
-    voiceBtn.textContent = '🎤';
-    voiceBtn.classList.remove('recording');
-    voiceBtn.disabled = true;
-    
+  // show once only if requested
+  if(displayUser){
+    addMessage(message, 'user');
+    // clear input only when message was typed
+    if(!text) userInput.value = '';
   } else {
-    // Start recording
-    try {
-      log('🎤 Starting...');
-      
-      // Clean up any previous recording first
-      cleanupRecording();
-      
-      recordingStream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true
-        }
-      });
-      
-      audioChunks = [];
-      mediaRecorder = new MediaRecorder(recordingStream);
-      
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunks.push(event.data);
-        }
-      };
-      
-      mediaRecorder.onstop = async () => {
-        log('📝 Processing...');
-        
-        try {
-          await transcribeAudio();
-        } catch (e) {
-          log(`❌ Process error: ${e.message}`);
-          addMessage('❌ Processing failed', 'error');
-        } finally {
-          cleanupRecording();
-        }
-      };
-      
-      mediaRecorder.onerror = (event) => {
-        log(`❌ Recorder error`);
-        cleanupRecording();
-      };
-      
-      mediaRecorder.start();
-      isRecording = true;
-      voiceBtn.textContent = '⏹️';
-      voiceBtn.classList.add('recording');
-      log('🎤 Recording...');
-      
-    } catch (error) {
-      log(`❌ Mic error: ${error.message}`);
-      addMessage('❌ Microphone access denied', 'error');
-      cleanupRecording();
+    // caller already displayed user message (don't duplicate)
+    if(!text) userInput.value = '';
+  }
+
+  sendBtn.disabled = true;
+  voiceBtn.disabled = true;
+  try{
+    const res = await fetch(API_URL + '/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({message, language: languageSelect.value})
+    });
+    const data = await res.json();
+    if(data.status === 'success'){
+      addMessage(data.reply || '(no reply)', 'bot');
+    }else{
+      addMessage('❌ ' + (data.message || data.reply || 'Error'), 'system');
     }
+    updateStats();
+  }catch(err){
+    addMessage('❌ Network error: ' + err.message, 'system');
+  }finally{
+    sendBtn.disabled = false;
+    voiceBtn.disabled = false;
   }
 }
 
-// ===== Event Listeners =====
-sendBtn.onclick = () => sendMessage();
-voiceBtn.onclick = () => toggleVoice();
-
-userInput.onkeypress = (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
+/* send on Enter */
+userInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && !e.shiftKey){
     e.preventDefault();
     sendMessage();
   }
-};
+});
+// ensure form never performs default submit/navigation
+const chatForm = document.getElementById('chatForm');
+if(chatForm){
+  chatForm.addEventListener('submit', (ev)=>{ ev.preventDefault(); return false; });
+}
 
-langSelect.onchange = (e) => {
-  log(`🌐 Language: ${e.target.value}`);
-  userInput.value = '';
-  userInput.placeholder = e.target.value === 'te' ? 'ఇక్కడ టైప్ చేయండి...' : 'Type your message...';
-};
+/* ========== Recording logic ========== */
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingStream = null;
+let isRecording = false;
 
-// ===== Global error handler to prevent page reload =====
-window.addEventListener('error', (e) => {
-  console.error('Global error:', e.error);
-  log('❌ Error caught');
-  e.preventDefault();
-  return true;
+/* fallback: Web Speech API (speech recognition) */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+const hasSpeechRecognition = !!SpeechRecognition;
+
+/* touch + click safe event to prevent mobile double-activation */
+/* replace attachPressHandler with this robust version */
+function attachPressHandler(el, handler){
+  // guard window-wide to prevent quick double triggers
+  let lastInvoked = 0;
+  const MIN_MS = 600; // ignore repeated activations within this window
+
+  function runner(ev){
+    if(ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+    const now = Date.now();
+    if(now - lastInvoked < MIN_MS) return;
+    lastInvoked = now;
+    handler();
+  }
+
+  // Touch + click, both call runner, but time guard prevents double-calls
+  el.addEventListener('touchstart', runner, {passive:false});
+  el.addEventListener('click', runner, {passive:false});
+}
+
+/* toggle recording */
+let usingSpeechRecognition = false;
+let currentRecognition = null;
+
+/* dedupe/protect and centralize sending of transcripts */
+let lastUserTranscript = '';
+let lastTranscriptTime = 0;
+
+// Centralized transcript handler (dedupe + display once)
+async function handleIncomingTranscript(txt, requestId = null){
+  if(!txt) return;
+  // dedupe logic (keep your existing dedupe if present)
+  const norm = normalizeTranscript(txt);
+  const now = Date.now();
+  const lastTs = _msme_seenTranscripts.get(norm) || 0;
+  if(lastTs && (now - lastTs) < TRANSCRIPT_DEDUPE_MS){
+    console.warn('Dropped duplicate transcript (recent):', txt);
+    if(requestId) _msme_seenRequestIds.add(requestId);
+    return;
+  }
+  if(requestId && _msme_seenRequestIds.has(requestId)) {
+    console.warn('Ignored duplicate requestId', requestId);
+    return;
+  }
+
+  // mark seen
+  if(requestId) _msme_seenRequestIds.add(requestId);
+  _msme_seenTranscripts.set(norm, now);
+
+  // show transcript once in chat
+  addMessage(txt, 'user');
+
+  // send to server but tell sendMessage that user message is already shown (displayUser=false)
+  try{
+    await sendMessage(txt, false);
+  }catch(e){
+    console.error('Error sending transcript text to server', e);
+  }
+}
+
+
+async function toggleRecording(){
+  if(isRecording){
+    // stop current recorder or recognition
+    if(usingSpeechRecognition && currentRecognition){
+      try { currentRecognition.onend = null; currentRecognition.onerror = null; currentRecognition.stop(); } catch(e){}
+      currentRecognition = null;
+      usingSpeechRecognition = false;
+    }
+    if(mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    isRecording = false;
+    voiceBtn.classList.remove('recording');
+    voiceBtn.textContent = '🎤';
+    return;
+  }
+
+  // set flags first to avoid races
+  isRecording = true;
+  voiceBtn.classList.add('recording');
+  voiceBtn.textContent = '⏹️';
+
+  // Prefer WebSpeechRecognition if available, but make it exclusive
+  if(hasSpeechRecognition){
+    try{
+      usingSpeechRecognition = true;
+      const recog = new SpeechRecognition();
+      currentRecognition = recog;
+      recog.lang = languageSelect.value === 'te' ? 'te-IN' : 'en-IN';
+      recog.interimResults = false;
+      recog.maxAlternatives = 1;
+
+      addMessage('Listening (speech recognition)…', 'system');
+
+      recog.onresult = (evt)=>{
+        const txt = evt.results[0][0].transcript.trim();
+        currentRecognition = null;
+        usingSpeechRecognition = false;
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+        voiceBtn.textContent = '🎤';
+        if(txt) handleIncomingTranscript(txt);
+      };
+      recog.onerror = (evt)=>{
+        // fallback to media recorder on recognition failure
+        currentRecognition = null;
+        usingSpeechRecognition = false;
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+        voiceBtn.textContent = '🎤';
+        addMessage('Speech recognition error: ' + (evt.error || 'unknown'), 'system');
+      };
+
+      recog.onend = ()=>{ // user stopped speaking
+        currentRecognition = null;
+        usingSpeechRecognition = false;
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+        voiceBtn.textContent = '🎤';
+      };
+
+      recog.start();
+      return; // important: don't start MediaRecorder if SpeechRecognition used
+    }catch(e){
+      // fall through to MediaRecorder if SpeechRecognition fails to initialize
+      console.warn('SpeechRecognition init failed', e);
+      usingSpeechRecognition = false;
+      currentRecognition = null;
+    }
+  }
+
+  // If we reach here, use MediaRecorder flow
+  try{
+    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    const options = { mimeType: 'audio/webm;codecs=opus' };
+    mediaRecorder = new MediaRecorder(recordingStream, options);
+
+    mediaRecorder.ondataavailable = (ev)=> { if(ev.data && ev.data.size>0) audioChunks.push(ev.data); };
+    mediaRecorder.onerror = (ev) => {
+      addMessage('Recording error: ' + (ev.error?.message || ev.type), 'system');
+      isRecording = false;
+      voiceBtn.classList.remove('recording');
+      voiceBtn.textContent = '🎤';
+    };
+    mediaRecorder.onstop = async ()=>{
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      audioChunks = [];
+      // guard to avoid duplicate transcriptions
+      await transcribeAudioBlob(blob);
+      if(recordingStream){ recordingStream.getTracks().forEach(t=>t.stop()); recordingStream=null; }
+      isRecording = false;
+      voiceBtn.classList.remove('recording');
+      voiceBtn.textContent = '🎤';
+    };
+
+    mediaRecorder.start();
+    addMessage('Recording… tap stop to finish', 'system');
+  }catch(err){
+    addMessage('Microphone access denied or not available', 'system');
+    isRecording = false;
+    voiceBtn.classList.remove('recording');
+    voiceBtn.textContent = '🎤';
+  }
+}
+
+/* transcribe blob — robust: attach language in FormData */
+async function transcribeAudioBlob(blob){
+  try{
+    const fd = new FormData();
+    fd.append('file', blob, 'voice.webm');
+    fd.append('language', languageSelect.value);
+    const res = await fetch(API_URL + '/transcribe', {
+      method: 'POST',
+      body: fd
+    });
+    const data = await res.json();
+    const text = (data && data.transcription) ? String(data.transcription).trim() : '';
+    if(text){
+      await handleIncomingTranscript(text);
+    } else {
+      addMessage('❌ ' + (data.message || 'No speech detected'), 'system');
+    }
+  }catch(err){
+    addMessage('Network error while transcribing: ' + err.message, 'system');
+  }
+}
+
+/* attach press handler safely */
+attachPressHandler(voiceBtn, toggleRecording);
+
+/* For keyboard users: allow space or enter to trigger voice button */
+voiceBtn.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRecording(); }
 });
 
-window.addEventListener('unhandledrejection', (e) => {
-  console.error('Unhandled promise rejection:', e.reason);
-  log('❌ Promise error caught');
-  e.preventDefault();
-  return true;
+/* send/click handlers */
+sendBtn.addEventListener('click', (e)=>{ e.preventDefault(); sendMessage(); });
+
+/* ========== Modals: basic open/close ========== */
+function openModal(id){ document.getElementById(id).classList.add('active'); document.getElementById(id).setAttribute('aria-hidden', 'false'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); document.getElementById(id).setAttribute('aria-hidden', 'true'); }
+
+document.getElementById('btn-feedback').addEventListener('click', ()=>openModal('feedbackModal'));
+document.getElementById('btn-subscribe').addEventListener('click', ()=>openModal('subscribeModal'));
+document.getElementById('btn-track').addEventListener('click', ()=>openModal('trackModal'));
+document.getElementById('btn-analytics').addEventListener('click', ()=>openModal('analyticsModal'));
+
+/* modal close helpers */
+document.querySelectorAll('.modal').forEach(m=>{
+  m.addEventListener('click', (ev)=>{ if(ev.target === m) closeModal(m.id); });
 });
 
-// ===== Initialize =====
-log('Connecting...');
-fetch(`${API_BASE}/`)
-  .then(r => r.json())
-  .then(data => log(`✅ Ready`))
-  .catch(e => log(`❌ Backend error`));
+/* ========== Feedback / Subscribe / Track / Analytics ========== */
+async function submitFeedback(){
+  const rating = parseInt(document.getElementById('feedbackRating').value || '5', 10);
+  const comment = document.getElementById('feedbackComment').value || '';
+  if(!comment.trim()){ alert('Please enter a comment'); return; }
+  try{
+    await fetch(API_URL + '/feedback', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({rating, comment}) });
+    addMessage('✅ Feedback submitted', 'system');
+    closeModal('feedbackModal');
+    updateStats();
+  }catch(e){
+    addMessage('❌ Failed to send feedback', 'system');
+  }
+}
+function closeFeedbackModal(){ closeModal('feedbackModal'); }
+
+async function submitSubscription(){
+  const email = document.getElementById('subscribeEmail').value;
+  const phone = document.getElementById('subscribePhone').value || '';
+  if(!email) { alert('Enter a valid email'); return; }
+  try{
+    await fetch(API_URL + '/subscribe-updates', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, phone })});
+    addMessage('✅ Subscribed', 'system');
+    closeModal('subscribeModal');
+  }catch(e){
+    addMessage('❌ Subscription failed', 'system');
+  }
+}
+function closeSubscribeModal(){ closeModal('subscribeModal'); }
+
+async function trackApplication(){
+  const appId = document.getElementById('trackingAppId').value.trim();
+  if(!appId) { alert('Enter application ID'); return; }
+  closeModal('trackModal');
+  addMessage('Tracking: ' + appId, 'user');
+  try{
+    const r = await fetch(API_URL + '/track-application/' + encodeURIComponent(appId));
+    const d = await r.json();
+    if(d.status === 'success'){ addMessage('✅ Status: ' + d.current_status, 'bot'); }
+    else addMessage('ℹ️ Application not found', 'system');
+  }catch(e){
+    addMessage('❌ Network error while tracking', 'system');
+  }
+}
+function closeTrackingModal(){ closeModal('trackModal'); }
+
+function closeAnalyticsModal(){ closeModal('analyticsModal'); updateStats(); }
+
+/* update analytics periodically */
+// setInterval(updateStats, 45_000);
+// ======= Crash/Reload diagnostics + persistence =======
+
+// Save messages to localStorage every time messagesEl changes
+function saveChatState(){
+  try{
+    const nodes = Array.from(document.querySelectorAll('#messages .msg')).map(n=>{
+      return {cls: n.className, text: n.textContent, t: Date.now()};
+    });
+    localStorage.setItem('msme_chat_state_v1', JSON.stringify({nodes, savedAt: Date.now()}));
+    // also write a small watchdog timestamp so we can see when save happened
+    localStorage.setItem('msme_watchdog_last_save', String(Date.now()));
+  }catch(e){
+    console.warn('saveChatState failed', e);
+  }
+}
+
+// Restore saved chat if available
+function restoreChatState(){
+  try{
+    const raw = localStorage.getItem('msme_chat_state_v1');
+    if(!raw) return false;
+    const parsed = JSON.parse(raw);
+    if(!parsed.nodes || !parsed.nodes.length) return false;
+    messagesEl.innerHTML = ''; // clear current
+    parsed.nodes.forEach(n=>{
+      const el = document.createElement('div');
+      el.className = n.cls;
+      el.textContent = n.text;
+      messagesEl.appendChild(el);
+    });
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    console.info('Restored chat state, savedAt=', new Date(parsed.savedAt).toISOString());
+    return true;
+  }catch(e){
+    console.warn('restoreChatState failed', e);
+    return false;
+  }
+}
+
+// Hook DOM mutation to auto-save (debounced)
+let saveTimer = null;
+const saveDebounceMs = 500;
+const observer = new MutationObserver(()=> {
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{ saveChatState(); saveTimer = null; }, saveDebounceMs);
+});
+observer.observe(messagesEl, { childList: true, subtree: true, characterData: true });
+
+// restore on load
+document.addEventListener('DOMContentLoaded', ()=>{
+  const restored = restoreChatState();
+  if(restored){
+    addMessage('(⚠️ restored previous chat after page reload)', 'system');
+  }
+});
+
+// record unload/visibility events for debugging
+function logUnloadReason(evtName, extra=''){
+  const now = Date.now();
+  const rec = {evtName, ts: now, url: location.href, extra};
+  try{
+    // append to a small rolling log in localStorage for offline debugging
+    const key = 'msme_unload_log_v1';
+    const raw = localStorage.getItem(key) || '[]';
+    const arr = JSON.parse(raw);
+    arr.push(rec);
+    if(arr.length > 30) arr.shift();
+    localStorage.setItem(key, JSON.stringify(arr));
+  }catch(e){ /* ignore */ }
+  console.info('UnloadLog:', rec);
+}
+
+document.addEventListener('visibilitychange', ()=> logUnloadReason('visibilitychange', document.visibilityState));
+window.addEventListener('pagehide', (e)=> logUnloadReason('pagehide', 'persisted=' + e.persisted));
+window.addEventListener('unload', ()=> logUnloadReason('unload'));
+
+// safe, conditional beforeunload: only warn if we really have unsaved chat content
+window._msme_hasUnsaved = false;
+
+// mark unsaved whenever user posts or when messages change
+const markUnsaved = ()=> { window._msme_hasUnsaved = true; };
+const markSaved = ()=> { window._msme_hasUnsaved = false; };
+
+// after we successfully restore or explicitly saved state, mark saved
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(restoreChatState()) {
+    // we restored state so consider it saved
+    markSaved();
+  } else {
+    // no saved state: nothing unsaved yet
+    markSaved();
+  }
+});
+
+// any new user message should mark unsaved
+const origAddMessage = window.addMessage || function(){};
+window.addMessage = function(...args){
+  try{ origAddMessage.apply(this, args); }catch(e){}
+  // if a user message (class 'user'), mark unsaved
+  if(args[1] === 'user') markUnsaved();
+};
+
+// define the handler and register it
+window._msme_beforeunload_handler = function(ev){
+  if(!window._msme_hasUnsaved) return undefined;
+  const msg = 'You have an active chat — leaving will clear it.';
+  ev.returnValue = msg;
+  return msg;
+};
+window.removeEventListener('beforeunload', window._msme_beforeunload_handler);
+window.addEventListener('beforeunload', window._msme_beforeunload_handler);
+
+
+// show last few debug entries with a keyboard shortcut (Ctrl+Shift+D)
+window.addEventListener('keydown', (e)=>{
+  if(e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd'){
+    const raw = localStorage.getItem('msme_unload_log_v1') || '[]';
+    const arr = JSON.parse(raw);
+    alert('Unload/debug log (last events):\\n' + JSON.stringify(arr.slice(-8), null, 2));
+  }
+});
+
+// detect service worker registrations (common silent reload culprit)
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    if(regs && regs.length){
+      console.warn('Service workers registered:', regs);
+      // store a debug fingerprint
+      localStorage.setItem('msme_service_workers', JSON.stringify(regs.map(r=>({scope: r.scope}))));
+    }else{
+      localStorage.removeItem('msme_service_workers');
+    }
+  }).catch(err=> console.warn('serviceWorker check failed', err));
+}
+
+// optional: add a tiny UI hint so you can click to dump debug logs to console
+const dbgBtn = document.createElement('button');
+dbgBtn.textContent = 'Debug logs';
+dbgBtn.title = 'Show recent unload/worker logs';
+dbgBtn.style.position = 'fixed';
+dbgBtn.style.bottom = '14px';
+dbgBtn.style.left = '14px';
+dbgBtn.style.zIndex = 9999;
+dbgBtn.style.padding = '6px 8px';
+dbgBtn.style.borderRadius = '8px';
+dbgBtn.style.border = 'none';
+dbgBtn.style.background = 'rgba(0,0,0,0.55)';
+dbgBtn.style.color = 'white';
+dbgBtn.style.fontSize = '12px';
+dbgBtn.addEventListener('click', ()=>{
+  console.group('MSME debug info');
+  console.log('watchdog_last_save:', localStorage.getItem('msme_watchdog_last_save'));
+  console.log('restore snapshot present?', !!localStorage.getItem('msme_chat_state_v1'));
+  console.log('unload log:', JSON.parse(localStorage.getItem('msme_unload_log_v1')||'[]'));
+  console.log('service workers:', localStorage.getItem('msme_service_workers'));
+  console.groupEnd();
+  alert('Debug log printed to console (open devtools).');
+});
+document.body.appendChild(dbgBtn);
+
+window.removeEventListener('beforeunload', window._msme_beforeunload_handler || (()=>{}));
+
 </script>
-
 </body>
 </html>
